@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BerzaUnify v2.0</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 20px;
+            padding: 25px;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            color: #bb86fc;
+            text-align: center;
+            margin-top: 0;
+            border-bottom: 2px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            color: #03dac6;
+            margin-top: 30px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+
+        p {
+            color: #b0b0b0;
+            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        #taskInput {
+            width: 100%;
+            box-sizing: border-box;
+            height: 150px;
+            background-color: #2a2a2a;
+            color: #e0e0e0;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 12px;
+            font-size: 16px;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+        
+        #taskInput:focus {
+            outline: none;
+            border-color: #bb86fc;
+            box-shadow: 0 0 5px rgba(187, 134, 252, 0.5);
+        }
+
+        #executeBtn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #121212;
+            background-color: #03dac6;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+        
+        #executeBtn:hover:not(:disabled) {
+            background-color: #37f0e0;
+        }
+
+        #executeBtn:active:not(:disabled) {
+            transform: scale(0.99);
+        }
+
+        #executeBtn:disabled {
+            background-color: #444;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        #log {
+            background-color: #000000;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 15px;
+            height: 400px;
+            overflow-y: scroll;
+            white-space: pre-wrap; /* Allows text to wrap */
+            word-wrap: break-word; /* Breaks long words */
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            color: #a9fca9; /* Greenish text for log feel */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>BerzaUnify v2.0</h1>
+        <p>Enter your complex task below. The orchestrator will generate a plan, utilize a team of AI experts to execute it, and synthesize the results.</p>
+        
+        <textarea id="taskInput" placeholder="Example: Analyze the provided conversation and generate a concise summary, then write a follow-up email based on the key action items."></textarea>
+        
+        <button id="executeBtn">Execute Task</button>
+        
+        <h2>Execution Log</h2>
+        <pre id="log"></pre>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const socket = io();
+            const taskInput = document.getElementById('taskInput');
+            const executeBtn = document.getElementById('executeBtn');
+            const logDiv = document.getElementById('log');
+
+            const addLogMessage = (message, className = '') => {
+                const span = document.createElement('span');
+                span.textContent = message + '\n';
+                if (className) {
+                    span.className = className;
+                }
+                logDiv.appendChild(span);
+                logDiv.scrollTop = logDiv.scrollHeight; // Auto-scroll to the bottom
+            };
+
+            executeBtn.addEventListener('click', () => {
+                const task = taskInput.value.trim();
+                if (task) {
+                    logDiv.innerHTML = ''; // Clear previous logs
+                    executeBtn.disabled = true;
+                    executeBtn.textContent = 'Executing...';
+                    addLogMessage('>>> User task received. Initiating execution...');
+                    socket.emit('handle_execute_task', { prompt: task });
+                } else {
+                    alert('Please enter a task description.');
+                }
+            });
+
+            socket.on('connect', () => {
+                addLogMessage('+++ System connected to server. Ready for tasks. +++');
+            });
+
+            socket.on('log_message', (data) => {
+                addLogMessage(data.message);
+                // Re-enable the button if server signals completion
+                if (typeof data === 'object' && (data.message || '').includes('EXECUTION_COMPLETE') || (data.message || '').includes('EXECUTION_HALTED')) {
+                    executeBtn.disabled = false;
+                    executeBtn.textContent = 'Execute Task';
+                }
+            });
+
+            socket.on('task_complete', (data) => {
+                addLogMessage(`\n--- TASK_COMPLETE ---`);
+                addLogMessage(data.message);
+                executeBtn.disabled = false;
+                executeBtn.textContent = 'Execute Task';
+            });
+            
+            socket.on('task_error', (data) => {
+                addLogMessage(`\n--- ERROR ---`);
+                addLogMessage(data.message);
+                executeBtn.disabled = false;
+                executeBtn.textContent = 'Execute Task';
+            });
+
+            socket.on('connect_error', (err) => {
+                const errorMessage = `--- CONNECTION ERROR: Could not connect to the server. Please ensure the backend is running. [${err.message}] ---`;
+                addLogMessage(errorMessage);
+                executeBtn.disabled = true; // Can't execute if not connected
+                executeBtn.textContent = 'Connection Failed';
+            });
+            
+            socket.on('disconnect', () => {
+                const errorMessage = '--- DISCONNECTED from server. Attempting to reconnect... ---';
+                addLogMessage(errorMessage);
+                executeBtn.disabled = true;
+                executeBtn.textContent = 'Reconnecting...';
+            });
+        });
+    </script>
+</body>
+</html>

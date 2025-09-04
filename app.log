@@ -1,0 +1,58 @@
+2025-09-04 17:22:06,403 - INFO - Starting BerzaUnify v2.0 server...
+2025-09-04 17:22:06,409 - INFO -  * Restarting with stat
+2025-09-04 17:22:07,299 - INFO - Starting BerzaUnify v2.0 server...
+2025-09-04 17:22:07,305 - WARNING -  * Debugger is active!
+2025-09-04 17:22:07,312 - INFO -  * Debugger PIN: 137-020-027
+(22556) wsgi starting up on http://0.0.0.0:5000
+(22556) accepted ('127.0.0.1', 57572)
+127.0.0.1 - - [04/Sep/2025 17:22:07] "GET /socket.io/?EIO=4&transport=polling&t=PaLKXlA HTTP/1.1" 200 300 0.000998
+2025-09-04 17:22:07,484 - INFO - Client connected.
+2025-09-04 17:22:07,485 - INFO - Emitting log to client: System Ready: Welcome to BerzaUnify v2.0.
+127.0.0.1 - - [04/Sep/2025 17:22:07] "POST /socket.io/?EIO=4&transport=polling&t=PaLKXxu&sid=vPKp6xkiZlU8zt-KAAAA HTTP/1.1" 200 219 0.003000
+127.0.0.1 - - [04/Sep/2025 17:22:07] "GET /socket.io/?EIO=4&transport=polling&t=PaLKXxv&sid=vPKp6xkiZlU8zt-KAAAA HTTP/1.1" 200 288 0.000997
+(22556) accepted ('127.0.0.1', 57574)
+(22556) accepted ('127.0.0.1', 57577)
+(22556) accepted ('127.0.0.1', 57578)
+127.0.0.1 - - [04/Sep/2025 17:22:07] "GET /socket.io/?EIO=4&transport=polling&t=PaLKXy2&sid=vPKp6xkiZlU8zt-KAAAA HTTP/1.1" 200 181 0.313091
+2025-09-04 17:22:48,108 - INFO - Serving index.html to a client.
+127.0.0.1 - - [04/Sep/2025 17:22:48] "GET / HTTP/1.1" 200 7211 0.005999
+2025-09-04 17:22:48,118 - INFO - Client disconnected.
+127.0.0.1 - - [04/Sep/2025 17:22:48] "GET /socket.io/?EIO=4&transport=websocket&sid=vPKp6xkiZlU8zt-KAAAA HTTP/1.1" 200 0 40.316877
+127.0.0.1 - - [04/Sep/2025 17:22:48] "GET /socket.io/?EIO=4&transport=polling&t=PaLKhtV HTTP/1.1" 200 300 0.000000
+2025-09-04 17:22:48,168 - INFO - Client connected.
+2025-09-04 17:22:48,168 - INFO - Emitting log to client: System Ready: Welcome to BerzaUnify v2.0.
+127.0.0.1 - - [04/Sep/2025 17:22:48] "POST /socket.io/?EIO=4&transport=polling&t=PaLKhtb&sid=i_Eap2yIFQYcB-ACAAAC HTTP/1.1" 200 219 0.002015
+127.0.0.1 - - [04/Sep/2025 17:22:48] "GET /socket.io/?EIO=4&transport=polling&t=PaLKhtc&sid=i_Eap2yIFQYcB-ACAAAC HTTP/1.1" 200 288 0.000000
+(22556) accepted ('127.0.0.1', 57585)
+127.0.0.1 - - [04/Sep/2025 17:22:48] "GET /socket.io/?EIO=4&transport=polling&t=PaLKhtj&sid=i_Eap2yIFQYcB-ACAAAC HTTP/1.1" 200 181 0.303327
+2025-09-04 17:22:51,841 - INFO - Emitting log to client: --- EXECUTION_TRIGGERED ---
+2025-09-04 17:22:51,842 - INFO - Started background task for orchestrator with prompt: My objective is to upgrade the `orchestrator_v2.py` script to version 2.1 by adding a new "Cost Estimator" feature. This feature will use the `count_tokens` method from the Google GenAI library to analyze the size of the Project Briefing *before* it is sent to the main Planner AI.
+
+This is a code modification task that will target the `orchestrator_v2.py` file.
+
+**Part 1: Modify the `call_ai` function**
+- The current `call_ai` function is for generating content. We need a new, separate function for counting tokens.
+- Create a new function `def count_tokens(prompt, model_name, socketio=None)`.
+- Inside this new function, it should call the `model.count_tokens()` method from the `genai` library.
+- It must include robust error handling. If the call fails, it should log an error and return `0`.
+- It should return the integer value of the `total_tokens`.
+
+**Part 2: Modify the `main_orchestrator` function**
+- Find the section labeled `STAGE 2: PLAN GENERATION`.
+- **Before** the line that calls the `call_ai` function to generate the plan, you must insert the new "Cost Estimator" logic.
+- The new logic must call your new `count_tokens` function, passing it the `project_briefing_prompt` and the `PLANNER_MODEL`.
+- After getting the token count, it must check if `token_count > 15000`.
+- If the count is greater than 15,000, it must emit a clear warning log to the UI, for example: `[WARNING] Large prompt detected (>15,000 tokens). This may result in higher costs and slower processing.`
+- The orchestrator should then proceed with the build as normal, regardless of the token count.
+
+**--- STRATEGIC INSTRUCTION FOR THE ORCHESTRATOR ---**
+This is a critical self-modification task. You must correctly analyze the existing `orchestrator_v2.py` code (which will be provided in the conversation context) and intelligently insert the new logic without breaking the existing functionality.
+
+Assign two parallel workers (Gemini Pro and Gemini Flash) to generate the new, complete `orchestrator_v2.py` file with the requested changes. Then, create a final synthesis task to review both versions and combine their best elements into a single, superior, final version of the `orchestrator_v2.py` script.
+2025-09-04 17:22:51,842 - INFO - Emitting log to client: Orchestrator V2 Initialized. Reading context...
+2025-09-04 17:22:51,842 - INFO - Emitting log to client: No conversation memory file found. Starting fresh.
+2025-09-04 17:22:51,843 - INFO - Emitting log to client: \U0001f9e0 Generating execution plan using model: gemini-2.5-pro-latest...
+2025-09-04 17:22:53,428 - INFO - AFC is enabled with max remote calls: 10.
+2025-09-04 17:22:59,371 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent "HTTP/1.1 503 Service Unavailable"
+2025-09-04 17:23:01,217 - INFO - AFC is enabled with max remote calls: 10.
+2025-09-04 17:23:07,108 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent "HTTP/1.1 503 Service Unavailable"
